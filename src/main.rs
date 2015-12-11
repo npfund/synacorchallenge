@@ -12,6 +12,22 @@ fn main() {
         let instruction = bytes[index];
         match instruction {
             0 => break,
+            1 => {
+                unsafe {
+                    registers[(bytes[index + 1] % 32768) as usize] = register_value_or_int(bytes[index + 2]);
+                }
+                index += 3;
+            },
+            4 => {
+                unsafe {
+                    if register_value_or_int(bytes[index + 2]) == register_value_or_int(bytes[index + 3]) {
+                        registers[(bytes[index + 1] % 32768) as usize] = 1;
+                    } else {
+                        registers[(bytes[index + 1] % 32768) as usize] = 0;
+                    }
+                }
+                index += 4;
+            },
             6 => index = bytes[index + 1] as usize,
             7 => if register_value_or_int(bytes[index + 1]) != 0 {
                 index = bytes[index + 2] as usize;
@@ -22,6 +38,13 @@ fn main() {
                 index = bytes[index + 2] as usize;
             } else {
                 index += 3;
+            },
+            9 => {
+                unsafe {
+                  let value = (register_value_or_int(bytes[index + 2]) + register_value_or_int(bytes[index + 3])) % 32768;
+                  registers[(bytes[index + 1] % 32768) as usize] = value;
+                }
+                index += 4;
             },
             19 => {
                 print!("{}", char::from_u32(bytes[index + 1] as u32).unwrap());
