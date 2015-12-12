@@ -16,8 +16,9 @@ fn main() {
         match instruction {
             0 => break,
             1 => {
-                if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], bytes[index + 2]); }
-                machine.set_register(bytes[index + 1], bytes[index + 2]);
+                let value = machine.r_or_i(bytes[index + 2]);
+                if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], value); }
+                machine.set_register(bytes[index + 1], value);
                 index += 3;
             },
             2 => {
