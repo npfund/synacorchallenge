@@ -7,7 +7,7 @@ use machine::Machine;
 
 fn main() {
     let mut machine = Machine::new();
-    let bytes = read_file("challenge.bin");
+    let mut bytes = read_file("challenge.bin");
     
     let mut index: usize = 0;
     while index < bytes.len() {
@@ -83,6 +83,16 @@ fn main() {
             14 => {
                 let value = !machine.r_or_i(bytes[index + 2]);
                 machine.set_register(bytes[index + 1], value);
+                index += 3;
+            },
+            15 => {
+                let address = machine.r_or_i(bytes[index + 2]) as usize;
+                machine.set_register(bytes[index + 1], bytes[address]);
+                index += 3;
+            },
+            16 => {
+                let address = machine.r_or_i(bytes[index + 1]) as usize;
+                bytes[address] = machine.r_or_i(bytes[index + 2]);
                 index += 3;
             },
             17 => {

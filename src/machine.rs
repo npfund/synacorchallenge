@@ -13,7 +13,7 @@ impl Machine {
     
     pub fn r_or_i(&self, input: u16) -> u16 {
         if input > 32767 {
-            return self.get_register(input);
+            return self.get_register(input as usize);
         } else {
             return input;
         }
@@ -24,8 +24,8 @@ impl Machine {
         self.registers[index] = self.r_or_i(value % 32768);
     }
 
-    pub fn get_register(&self, input: u16) -> u16 {
-        return self.registers[(input % 32768) as usize];
+    pub fn get_register(&self, input: usize) -> u16 {
+        return self.registers[input % 32768];
     }
 
     pub fn push(&mut self, value: u16) {
