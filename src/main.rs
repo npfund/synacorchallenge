@@ -60,6 +60,16 @@ fn main() {
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
+            10 => {
+                let value = (machine.r_or_i(bytes[index + 2]) as u32 * machine.r_or_i(bytes[index + 3]) as u32) as u16;
+                machine.set_register(bytes[index + 1], value);
+                index += 4;
+            },
+            11 => {
+                let value = machine.r_or_i(bytes[index + 2]) % machine.r_or_i(bytes[index + 3]);
+                machine.set_register(bytes[index + 1], value);
+                index += 4;
+            },
             12 => {
                 let value = machine.r_or_i(bytes[index + 2]) & machine.r_or_i(bytes[index + 3]);
                 machine.set_register(bytes[index + 1], value);
