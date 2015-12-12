@@ -1,6 +1,8 @@
 use std::fs::File;
+use std::io;
 use std::io::Read;
 use std::char;
+use std::collections::VecDeque;
 
 mod machine;
 use machine::Machine;
@@ -9,6 +11,9 @@ fn main() {
     let debug = false;
     let mut machine = Machine::new();
     let mut bytes = read_file("challenge.bin");
+
+    let mut input_buffer = String::new();
+    let mut input_chars: VecDeque<char> = VecDeque::new();
     
     let mut index: usize = 0;
     while index < bytes.len() {
@@ -141,6 +146,31 @@ fn main() {
                 let value = char::from_u32(bytes[index + 1] as u32).unwrap();
                 if debug { println!("{}: Print {}", index, value); }
                 print!("{}", value);
+                index += 2;
+            },
+            20 => {
+                let value;
+
+                match input_chars.pop_front() {
+                    Some(c) => value = c as u16,
+                    None => {
+                        match io::stdin().read_line(&mut input_buffer) {
+                            Ok(n) => {
+                                for c in input_buffer.chars() {
+                                    input_chars.push_back(c);
+                                }
+                                value = input_chars.pop_front().unwrap() as u16;
+                            },
+                            Err(error) => {
+                                println!("{}: {}", index, error);
+                                continue;
+                            }
+                        }
+                    }
+                }
+
+                if debug { println!("{}: Read {} into {}", index, value, bytes[index + 1]); }
+                machine.set_register(bytes[index + 1], value);
                 index += 2;
             },
             21 => {
