@@ -2,9 +2,11 @@ use std::fs::File;
 use std::io::Read;
 use std::char;
 
-static mut registers: [u16; 8] = [0u16; 8];
+mod machine;
+use machine::Machine;
 
 fn main() {
+    let mut machine = Machine::new();
     let bytes = read_file("challenge.bin");
     
     let mut index: usize = 0;
@@ -13,37 +15,31 @@ fn main() {
         match instruction {
             0 => break,
             1 => {
-                unsafe {
-                    registers[(bytes[index + 1] % 32768) as usize] = register_value_or_int(bytes[index + 2]);
-                }
+                machine.set_register(bytes[index + 1], bytes[index + 2]);
                 index += 3;
             },
             4 => {
-                unsafe {
-                    if register_value_or_int(bytes[index + 2]) == register_value_or_int(bytes[index + 3]) {
-                        registers[(bytes[index + 1] % 32768) as usize] = 1;
-                    } else {
-                        registers[(bytes[index + 1] % 32768) as usize] = 0;
-                    }
+                if machine.r_or_i(bytes[index + 2]) == machine.r_or_i(bytes[index + 3]) {
+                    machine.set_register(bytes[index + 1], 1);
+                } else {
+                    machine.set_register(bytes[index + 1], 0);
                 }
                 index += 4;
             },
             6 => index = bytes[index + 1] as usize,
-            7 => if register_value_or_int(bytes[index + 1]) != 0 {
+            7 => if machine.r_or_i(bytes[index + 1]) != 0 {
                 index = bytes[index + 2] as usize;
             } else {
                 index += 3;
             },
-            8 => if register_value_or_int(bytes[index + 1]) == 0 {
+            8 => if machine.r_or_i(bytes[index + 1]) == 0 {
                 index = bytes[index + 2] as usize;
             } else {
                 index += 3;
             },
             9 => {
-                unsafe {
-                  let value = (register_value_or_int(bytes[index + 2]) + register_value_or_int(bytes[index + 3])) % 32768;
-                  registers[(bytes[index + 1] % 32768) as usize] = value;
-                }
+                let value = machine.r_or_i(bytes[index + 2]) + machine.r_or_i(bytes[index + 3]);
+                machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             19 => {
@@ -72,13 +68,3 @@ fn read_file(file: &str) -> Vec<u16> {
     return bytes;
 }
 
-fn register_value_or_int(input: u16) -> u16 {
-    if input > 32767 {
-        return unsafe {
-            return registers[(input - 32768) as usize];
-        }
-    } else {
-        return input;
-    }
-    return 0;
-}
