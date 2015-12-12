@@ -6,6 +6,7 @@ mod machine;
 use machine::Machine;
 
 fn main() {
+    let debug = false;
     let mut machine = Machine::new();
     let mut bytes = read_file("challenge.bin");
     
@@ -15,100 +16,138 @@ fn main() {
         match instruction {
             0 => break,
             1 => {
+                if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], bytes[index + 2]); }
                 machine.set_register(bytes[index + 1], bytes[index + 2]);
                 index += 3;
             },
             2 => {
                 let value = machine.r_or_i(bytes[index + 1]);
+                if debug { println!("{}: Push {}", index, bytes[index + 1]); }
                 machine.push(value);
                 index += 2;
             },
             3 => {
                 let value = machine.pop();
+                if debug { println!("{}: Pop {} into {}", index, value, bytes[index + 1]); }
                 machine.set_register(bytes[index + 1], value);
                 index += 2;
             },
             4 => {
+                if debug { println!("{}: Check {} == {}", index, bytes[index + 2], bytes[index + 3]); }
                 if machine.r_or_i(bytes[index + 2]) == machine.r_or_i(bytes[index + 3]) {
+                    if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], 1); }
                     machine.set_register(bytes[index + 1], 1);
                 } else {
+                    if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], 0); }
                     machine.set_register(bytes[index + 1], 0);
                 }
                 index += 4;
             },
             5 => {
+                if debug { println!("{}: Check {} > {}", index, bytes[index + 2], bytes[index + 3]); }
                 if machine.r_or_i(bytes[index + 2]) > machine.r_or_i(bytes[index + 3]) {
+                    if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], 1); }
                     machine.set_register(bytes[index + 1], 1);
                 } else {
+                    if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], 0); }
                     machine.set_register(bytes[index + 1], 0);
                 }
                 index += 4;
             }
-            6 => index = bytes[index + 1] as usize,
-            7 => if machine.r_or_i(bytes[index + 1]) != 0 {
-                index = bytes[index + 2] as usize;
-            } else {
-                index += 3;
+            6 => {
+                if debug { println!("{}: Jump to {}", index, bytes[index + 1]); }
+                index = bytes[index + 1] as usize;
             },
-            8 => if machine.r_or_i(bytes[index + 1]) == 0 {
-                index = bytes[index + 2] as usize;
-            } else {
-                index += 3;
+            7 => {
+                if debug { println!("{}: Check {} != 0", index, bytes[index + 1]); }
+                if machine.r_or_i(bytes[index + 1]) != 0 {
+                    if debug { println!("{}: Jump to {}", index, bytes[index + 2]); }
+                    index = bytes[index + 2] as usize;
+                } else {
+                    if debug { println!("{}: No jump", index); }
+                    index += 3;
+                }
+            },
+            8 => {
+                if debug { println!("{}: Check {} == 0", index, bytes[index + 1]); }
+                if machine.r_or_i(bytes[index + 1]) == 0 {
+                    if debug { println!("{}: Jump to {}", index, bytes[index + 2]); }
+                    index = bytes[index + 2] as usize;
+                } else {
+                    if debug { println!("{}: No jump", index); }
+                    index += 3;
+                }
             },
             9 => {
                 let value = machine.r_or_i(bytes[index + 2]) + machine.r_or_i(bytes[index + 3]);
+                if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             10 => {
                 let value = (machine.r_or_i(bytes[index + 2]) as u32 * machine.r_or_i(bytes[index + 3]) as u32) as u16;
+                if debug { println!("{}: MULT Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             11 => {
                 let value = machine.r_or_i(bytes[index + 2]) % machine.r_or_i(bytes[index + 3]);
+                if debug { println!("{}: MOD Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             12 => {
                 let value = machine.r_or_i(bytes[index + 2]) & machine.r_or_i(bytes[index + 3]);
+                if debug { println!("{}: AND Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             13 => {
                 let value = machine.r_or_i(bytes[index + 2]) | machine.r_or_i(bytes[index + 3]);
+                if debug { println!("{}: OR Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
             14 => {
                 let value = !machine.r_or_i(bytes[index + 2]);
+                if debug { println!("{}: NOT Set register {} to {}", index, bytes[index + 1], value); }
                 machine.set_register(bytes[index + 1], value);
                 index += 3;
             },
             15 => {
                 let address = machine.r_or_i(bytes[index + 2]) as usize;
+                if debug { println!("{}: Set register {} to {}", index, bytes[index + 1], bytes[address]); }
                 machine.set_register(bytes[index + 1], bytes[address]);
                 index += 3;
             },
             16 => {
                 let address = machine.r_or_i(bytes[index + 1]) as usize;
+                if debug { println!("{}: Set register {} to {}", index, bytes[address], machine.r_or_i(bytes[index + 2])); }
                 bytes[address] = machine.r_or_i(bytes[index + 2]);
                 index += 3;
             },
             17 => {
+                if debug { println!("{}: Push {}; jump to {}", index, index + 2, machine.r_or_i(bytes[index + 1])); }
                 machine.push((index + 2) as u16);
                 index = machine.r_or_i(bytes[index + 1]) as usize;
             },
             18 => {
-                index = machine.pop() as usize;
+                let value = machine.pop() as usize;
+                if debug { println!("{}: Return to {}", index, value); }
+                index = value;
             },
             19 => {
-                print!("{}", char::from_u32(bytes[index + 1] as u32).unwrap());
+                let value = char::from_u32(bytes[index + 1] as u32).unwrap();
+                if debug { println!("{}: Print {}", index, value); }
+                print!("{}", value);
                 index += 2;
             },
-            21 => index += 1,
+            21 => {
+                if debug { println!("{}: NOOP", index); }
+                index += 1;
+            },
             _ => {
-                println!("Unknown instruction {}", instruction);
+                println!("{}: Unknown instruction {}", index, instruction);
                 index += 1
             },
         }
