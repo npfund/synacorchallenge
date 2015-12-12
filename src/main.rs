@@ -143,7 +143,7 @@ fn main() {
                 index = value;
             },
             19 => {
-                let value = char::from_u32(bytes[index + 1] as u32).unwrap();
+                let value = char::from_u32(machine.r_or_i(bytes[index + 1]) as u32).unwrap();
                 if debug { println!("{}: Print {}", index, value); }
                 print!("{}", value);
                 index += 2;
