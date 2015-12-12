@@ -18,6 +18,16 @@ fn main() {
                 machine.set_register(bytes[index + 1], bytes[index + 2]);
                 index += 3;
             },
+            2 => {
+                let value = machine.r_or_i(bytes[index + 1]);
+                machine.push(value);
+                index += 2;
+            },
+            3 => {
+                let value = machine.pop();
+                machine.set_register(bytes[index + 1], value);
+                index += 2;
+            },
             4 => {
                 if machine.r_or_i(bytes[index + 2]) == machine.r_or_i(bytes[index + 3]) {
                     machine.set_register(bytes[index + 1], 1);
