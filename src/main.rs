@@ -159,6 +159,7 @@ fn main() {
                                 for c in input_buffer.chars() {
                                     input_chars.push_back(c);
                                 }
+                                input_buffer = "".to_string();
                                 value = input_chars.pop_front().unwrap() as u16;
                             },
                             Err(error) => {
