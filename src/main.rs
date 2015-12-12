@@ -74,7 +74,14 @@ fn main() {
                 let value = !machine.r_or_i(bytes[index + 2]);
                 machine.set_register(bytes[index + 1], value);
                 index += 3;
-            }
+            },
+            17 => {
+                machine.push((index + 2) as u16);
+                index = machine.r_or_i(bytes[index + 1]) as usize;
+            },
+            18 => {
+                index = machine.pop() as usize;
+            },
             19 => {
                 print!("{}", char::from_u32(bytes[index + 1] as u32).unwrap());
                 index += 2;
