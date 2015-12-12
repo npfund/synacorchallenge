@@ -36,6 +36,14 @@ fn main() {
                 }
                 index += 4;
             },
+            5 => {
+                if machine.r_or_i(bytes[index + 2]) > machine.r_or_i(bytes[index + 3]) {
+                    machine.set_register(bytes[index + 1], 1);
+                } else {
+                    machine.set_register(bytes[index + 1], 0);
+                }
+                index += 4;
+            }
             6 => index = bytes[index + 1] as usize,
             7 => if machine.r_or_i(bytes[index + 1]) != 0 {
                 index = bytes[index + 2] as usize;
@@ -52,6 +60,21 @@ fn main() {
                 machine.set_register(bytes[index + 1], value);
                 index += 4;
             },
+            12 => {
+                let value = machine.r_or_i(bytes[index + 2]) & machine.r_or_i(bytes[index + 3]);
+                machine.set_register(bytes[index + 1], value);
+                index += 4;
+            },
+            13 => {
+                let value = machine.r_or_i(bytes[index + 2]) | machine.r_or_i(bytes[index + 3]);
+                machine.set_register(bytes[index + 1], value);
+                index += 4;
+            },
+            14 => {
+                let value = !machine.r_or_i(bytes[index + 2]);
+                machine.set_register(bytes[index + 1], value);
+                index += 3;
+            }
             19 => {
                 print!("{}", char::from_u32(bytes[index + 1] as u32).unwrap());
                 index += 2;
