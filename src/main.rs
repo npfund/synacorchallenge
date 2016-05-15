@@ -10,7 +10,7 @@ use machine::Machine;
 fn main() {
     let debug = false;
     let mut machine = Machine::new();
-    let mut bytes = read_file("challenge.bin");
+    let mut bytes = read_file("src/challenge.bin");
 
     let mut input_buffer = String::new();
     let mut input_chars: VecDeque<char> = VecDeque::new();
