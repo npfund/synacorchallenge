@@ -8,9 +8,9 @@ impl Machine {
         return Machine {
             registers: [0u16; 8],
             stack: Vec::new(),
-        }
+        };
     }
-    
+
     pub fn r_or_i(&self, input: u16) -> u16 {
         if input > 32767 {
             return self.get_register(input as usize);
