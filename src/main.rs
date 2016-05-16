@@ -241,7 +241,7 @@ fn main() {
                     Some(c) => value = c as u16,
                     None => {
                         match io::stdin().read_line(&mut input_buffer) {
-                            Ok(n) => {
+                            Ok(_) => {
                                 for c in input_buffer.chars() {
                                     input_chars.push_back(c);
                                 }
